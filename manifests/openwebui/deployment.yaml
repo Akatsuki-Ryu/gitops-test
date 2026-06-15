@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: openwebui, namespace: openwebui }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }            # RWO PVC, single writer
+  selector: { matchLabels: { app: openwebui } }
+  template:
+    metadata: { labels: { app: openwebui } }
+    spec:
+      containers:
+        - name: open-webui
+          image: ghcr.io/open-webui/open-webui:0.9.6
+          ports: [ { containerPort: 8080, name: http } ]
+          env:
+            - { name: WEBUI_URL, value: "https://webui.81.27.99.77.nip.io" }
+          volumeMounts:
+            - { name: data, mountPath: /app/backend/data }
+          readinessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 30          # boot loads an embedding model (~2-3min)
+        # Tailscale TUN sidecar — shares the pod netns so open-webui reaches the tailnet.
+        - name: tailscale
+          image: tailscale/tailscale:latest
+          env:
+            - { name: TS_AUTHKEY, valueFrom: { secretKeyRef: { name: openwebui-tailscale, key: TS_AUTHKEY } } }
+            - { name: TS_USERSPACE, value: "false" }     # TUN mode = transparent routing
+            - { name: TS_STATE_DIR, value: "/var/lib/tailscale" }
+            - { name: TS_HOSTNAME, value: "openwebui-playground" }
+            - { name: TS_EXTRA_ARGS, value: "--accept-routes" }
+            - { name: TS_ACCEPT_DNS, value: "true" }
+          securityContext:
+            capabilities: { add: [NET_ADMIN] }
+          volumeMounts:
+            - { name: tsstate, mountPath: /var/lib/tailscale }
+      volumes:
+        - { name: data, persistentVolumeClaim: { claimName: openwebui-data } }
+        - { name: tsstate, emptyDir: {} }
