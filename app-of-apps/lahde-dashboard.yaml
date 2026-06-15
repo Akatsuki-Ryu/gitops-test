@@ -15,6 +15,7 @@ spec:
       valuesObject:
         image:
           pullSecrets: [ghcr-pull-secret]
+          tag: "0.5.0"
         config:
           DASHBOARD_BOOTSTRAP_EMAIL: akatsuki.liu@digitalistgroup.com
         envFrom:
