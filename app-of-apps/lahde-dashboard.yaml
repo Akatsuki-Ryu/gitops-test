@@ -22,6 +22,19 @@ spec:
           - secretRef: {name: lahde-dashboard-secrets}
         persistence:
           storageClassName: upcloud-block-storage-hdd
+        ingress:
+          enabled: true
+          ingressClassName: traefik
+          annotations:
+            cert-manager.io/cluster-issuer: letsencrypt-staging
+            traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          ingressPortName: http
+          hosts:
+            - dashboard.81.27.99.77.nip.io
+          tls:
+            - secretName: dashboard-tls
+              hosts:
+                - dashboard.81.27.99.77.nip.io
   destination: {server: https://kubernetes.default.svc, namespace: lahde}
   syncPolicy:
     automated: {prune: true, selfHeal: true}
