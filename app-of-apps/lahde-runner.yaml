@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lahde-runner
+  namespace: argocd
+  finalizers: [resources-finalizer.argocd.argoproj.io]
+spec:
+  project: default
+  source:
+    repoURL: http://chartmuseum.infrastructure.svc.cluster.local:8080
+    chart: lahde-runner
+    targetRevision: "0.5.1"
+    helm:
+      releaseName: lahde-runner
+      valuesObject:
+        image:
+          pullSecrets: [ghcr-pull-secret]
+        envFrom:
+          - secretRef: {name: lahde-runner-secrets}
+        persistence:
+          storageClassName: upcloud-block-storage-hdd
+  destination: {server: https://kubernetes.default.svc, namespace: lahde}
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]

@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-lahde
+  namespace: argocd
+  finalizers: [resources-finalizer.argocd.argoproj.io]
+spec:
+  project: default
+  source:
+    repoURL: http://chartmuseum.infrastructure.svc.cluster.local:8080
+    chart: lahde
+    targetRevision: "0.5.1"
+    helm:
+      releaseName: lahde
+      valuesObject:
+        tenant: {name: demo, runnerNamespace: lahde}
+        image:
+          pullSecrets: [ghcr-pull-secret]
+        rag:
+          config: {CLIENT_ID: demo, CLIENT_NAME: "Demo"}
+          envFrom:
+            - secretRef: {name: lahde-rag-secrets}
+          ingestHTTPRoute: {enabled: false}
+          persistence: {storageClassName: upcloud-block-storage-hdd, size: 1Gi}
+        qdrant:
+          envFrom:
+            - secretRef: {name: lahde-qdrant-secrets}
+          persistence: {storageClassName: upcloud-block-storage-hdd, size: 20Gi}
+  destination: {server: https://kubernetes.default.svc, namespace: demo}
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]

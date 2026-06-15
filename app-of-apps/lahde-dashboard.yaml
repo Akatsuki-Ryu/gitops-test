@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lahde-dashboard
+  namespace: argocd
+  finalizers: [resources-finalizer.argocd.argoproj.io]
+spec:
+  project: default
+  source:
+    repoURL: http://chartmuseum.infrastructure.svc.cluster.local:8080
+    chart: lahde-dashboard
+    targetRevision: "0.5.1"
+    helm:
+      releaseName: lahde-dashboard
+      valuesObject:
+        image:
+          pullSecrets: [ghcr-pull-secret]
+        config:
+          DASHBOARD_BOOTSTRAP_EMAIL: akatsuki.liu@digitalistgroup.com
+        envFrom:
+          - secretRef: {name: lahde-dashboard-secrets}
+        persistence:
+          storageClassName: upcloud-block-storage-hdd
+  destination: {server: https://kubernetes.default.svc, namespace: lahde}
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
