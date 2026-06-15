@@ -28,6 +28,7 @@ spec:
             - { name: TS_AUTHKEY, valueFrom: { secretKeyRef: { name: openwebui-tailscale, key: TS_AUTHKEY } } }
             - { name: TS_USERSPACE, value: "false" }     # TUN mode = transparent routing
             - { name: TS_STATE_DIR, value: "/var/lib/tailscale" }
+            - { name: TS_KUBE_SECRET, value: "" }          # use TS_STATE_DIR (emptyDir), not a kube Secret (no RBAC)
             - { name: TS_HOSTNAME, value: "openwebui-playground" }
             - { name: TS_EXTRA_ARGS, value: "--accept-routes" }
             - { name: TS_ACCEPT_DNS, value: "true" }
