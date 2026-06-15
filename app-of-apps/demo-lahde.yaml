@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: http://chartmuseum.infrastructure.svc.cluster.local:8080
     chart: lahde
-    targetRevision: "0.5.1"
+    targetRevision: "0.5.0"
     helm:
       releaseName: lahde
       valuesObject:
