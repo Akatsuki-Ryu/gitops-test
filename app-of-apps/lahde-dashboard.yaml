@@ -9,13 +9,13 @@ spec:
   source:
     repoURL: http://chartmuseum.infrastructure.svc.cluster.local:8080
     chart: lahde-dashboard
-    targetRevision: "0.5.0"
+    targetRevision: "0.5.1"
     helm:
       releaseName: lahde-dashboard
       valuesObject:
         image:
           pullSecrets: [ghcr-pull-secret]
-          tag: "0.5.0"
+          tag: "0.5.1"
         config:
           DASHBOARD_BOOTSTRAP_EMAIL: akatsuki.liu@digitalistgroup.com
         envFrom:
